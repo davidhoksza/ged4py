@@ -76,10 +76,15 @@ class AbstractGraphEditDistance(object):
 
     def print_matrix(self):
         print("cost matrix:")
-        for column in self.create_cost_matrix():
-            for row in column:
-                if row == sys.maxint:
-                    print ("inf\t")
-                else:
-                    print ("%.2f\t" % float(row))
-            print("")
+        # for column in self.create_cost_matrix():
+        #     for row in column:
+        #         if row == sys.maxint:
+        #             print ("inf\t")
+        #         else:
+        #             print ("%.2f\t" % float(row))
+        #     print("")
+
+        for row in np.transpose(self.create_cost_matrix()):
+            for val in row:
+                print('{:8.2}'.format(val if val != sys.maxsize else -1.), end='')
+            print()
