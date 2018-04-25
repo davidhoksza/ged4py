@@ -8,13 +8,13 @@ from networkx import __version__ as nxv
 
 
 
-def compare(g1, g2, print_details=False):
+def compare(g1, g2, print_details=False, normalized=True, mapping=False):
     ged = GraphEditDistance(g1, g2)
 
     if print_details:
         ged.print_matrix()
 
-    return ged.normalized_distance()
+    return ged.distance(normalized, mapping)
 
 
 class GraphEditDistance(AbstractGraphEditDistance):
@@ -52,4 +52,4 @@ class GraphEditDistance(AbstractGraphEditDistance):
             return max(len(edges1), len(edges2))
 
         edit_edit_dist = EdgeEditDistance(EdgeGraph(node1,edges1), EdgeGraph(node2,edges2))
-        return edit_edit_dist.normalized_distance()
+        return edit_edit_dist.distance()

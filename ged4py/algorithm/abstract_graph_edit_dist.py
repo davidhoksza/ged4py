@@ -12,22 +12,32 @@ class AbstractGraphEditDistance(object):
         self.g1 = g1
         self.g2 = g2
 
-    def normalized_distance(self):
+    def distance(self, normalized=True, mapping=False):
         """
         Returns the graph edit distance between graph g1 & g2
         The distance is normalized on the size of the two graphs.
         This is done to avoid favorisation towards smaller graphs
         """
         avg_graphlen = (len(self.g1) + len(self.g2)) / 2
-        return self.distance() / avg_graphlen
+        res = self.compute()
+        if normalized:
+            res["distance"] /= avg_graphlen
 
-    def distance(self):
-        return sum(self.edit_costs())
+        return res if mapping else res["distance"]
 
-    def edit_costs(self):
+    def compute(self):
+
         cost_matrix = self.create_cost_matrix()
+
         row_ind,col_ind = linear_sum_assignment(cost_matrix)
-        return [cost_matrix[row_ind[i]][col_ind[i]] for i in range(len(row_ind))]
+        mapping = extract_mapping(row_ind, col_ind, self.g1, self.g2)
+        self.result = {
+            'mapping': mapping,
+            'distance': sum([cost_matrix[row_ind[i]][col_ind[i]] for i in range(len(row_ind))])
+        }
+
+        return self.result
+
 
     def create_cost_matrix(self):
         """
@@ -88,3 +98,18 @@ class AbstractGraphEditDistance(object):
             for val in row:
                 print('{:8.2}'.format(val if val != sys.maxsize else -1.), end='')
             print()
+
+def extract_mapping(row_ind, col_ind, g1, g2):
+    mapping = []
+    for i in range(len(row_ind)):
+        if row_ind[i] < len(g1) or col_ind[i] < len(g2):
+            i_row = row_ind[i]
+            i_col = col_ind[i]
+            if i_row >= len(g1):
+                i_row = -1
+            if i_col >= len(g2):
+                i_col = -1
+            mapping.append([i_row, i_col])
+
+    return mapping
+
